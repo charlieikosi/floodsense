@@ -49,7 +49,7 @@ dependencies = [
     "pystac-client",
     "planetary-computer",
     "odc-stac",
-    "xrspatial",
+    "xarray-spatial",
     "pytz"
 ]
 
