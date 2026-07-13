@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "floodsense"
+version = "0.0.1"
+description = "Flood detection and inundation mapping using Sentinel-1 SAR imagery"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+
+authors = [
+    { name = "Charlie Ikosi" }
+]
+
+keywords = [
+    "flood",
+    "flood-mapping",
+    "remote-sensing",
+    "sentinel-1",
+    "sar",
+    "change-detection",
+    "gis",
+    "geospatial",
+    "planetary-computer"
+]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: GIS",
+]
+
+dependencies = [
+    "geopandas",
+    "numpy",
+    "xarray",
+    "rioxarray",
+    "rasterio",
+    "shapely",
+    "scipy",
+    "scikit-image",
+    "pystac-client",
+    "planetary-computer",
+    "odc-stac",
+    "xarray-spatial",
+    "pytz"
+]
+
+[project.urls]
+Homepage = "https://github.com/charlieikosi/floodsense"
+Repository = "https://github.com/charlieikosi/floodsense"
+Issues = "https://github.com/charlieikosi/floodsense/issues"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["floodsense*"]
