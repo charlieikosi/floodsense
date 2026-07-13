@@ -1,3 +1,5 @@
+import geopandas as gpd
+
 def get_rtc_catalog_items(shapefile_path, date_range):
     """
     Finds Sentinel-1 RTC items and handles CRS projection for the search.
