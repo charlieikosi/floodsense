@@ -19,6 +19,62 @@ def classify_severity(area_ha):
     else:
         return "High"
 
+
+def classify_confidence(
+    area_ha,
+    mean_vv_change_db,
+    mean_vh_change_db
+):
+    """
+    Calculate a confidence score (0-100)
+    using VV change, VH change and flood area.
+    """
+
+    score = 0
+
+    # VH component (0-50)
+    if mean_vh_change_db <= -6:
+        score += 50
+
+    elif mean_vh_change_db <= -4:
+        score += 35
+
+    elif mean_vh_change_db <= -2.5:
+        score += 20
+
+    # VV component (0-30)
+    if mean_vv_change_db <= -5:
+        score += 30
+
+    elif mean_vv_change_db <= -3:
+        score += 20
+
+    elif mean_vv_change_db <= -2:
+        score += 10
+
+    # Area component (0-20)
+    if area_ha >= 50:
+        score += 20
+
+    elif area_ha >= 5:
+        score += 10
+
+    else:
+        score += 5
+
+    # Classification
+    if score >= 75:
+        confidence = "High"
+
+    elif score >= 50:
+        confidence = "Medium"
+
+    else:
+        confidence = "Low"
+
+    return score, confidence
+
+
 def export_mask_to_polygons(
     data_array,
     output_filename="flood_polygons.geojson",
@@ -99,6 +155,9 @@ def export_mask_to_polygons(
         classify_severity
     )
 
+    gdf["confidence_score"] = None
+    gdf["confidence_class"] = None
+
     gdf["mean_vv_change_db"] = None
     gdf["mean_vh_change_db"] = None
 
@@ -131,6 +190,15 @@ def export_mask_to_polygons(
                 gdf.loc[idx, "mean_vh_change_db"] = float(
                     vh_clip.mean().values
                 )
+
+                confidence_score, confidence_class = classify_confidence(
+                    row["area_ha"],
+                    float(vv_clip.mean().values),
+                    float(vh_clip.mean().values)
+                )
+
+                gdf.loc[idx, "confidence_score"] = confidence_score
+                gdf.loc[idx, "confidence_class"] = confidence_class
 
                 gdf.loc[idx, "min_vv_change_db"] = float(
                     vv_clip.min().values
