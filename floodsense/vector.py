@@ -104,6 +104,48 @@ def export_mask_to_polygons(
 
     gdf["max_vv_change_db"] = None
     gdf["max_vh_change_db"] = None
+
+    if change_vv is not None and change_vh is not None:
+
+        for idx, row in gdf.iterrows():
+
+            geom = [row.geometry]
+
+            try:
+                vv_clip = change_vv.rio.clip(
+                    geom,
+                    gdf.crs,
+                    drop=True
+                )
+
+                vh_clip = change_vh.rio.clip(
+                    geom,
+                    gdf.crs,
+                    drop=True
+                )
+
+                gdf.loc[idx, "mean_vv_change_db"] = float(
+                    vv_clip.mean().values
+                )
+
+                gdf.loc[idx, "mean_vh_change_db"] = float(
+                    vh_clip.mean().values
+                )
+
+                gdf.loc[idx, "max_vv_change_db"] = float(
+                    vv_clip.max().values
+                )
+
+                gdf.loc[idx, "max_vh_change_db"] = float(
+                    vh_clip.max().values
+                )
+
+            except Exception as e:
+                print(
+                    f"Warning: Could not calculate "
+                    f"change statistics for flood "
+                    f"{row['flood_id']}: {e}"
+                )
     
     # Export to file (GeoJSON or Shapefile depending on the extension provided)
     try:
