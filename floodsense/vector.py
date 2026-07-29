@@ -2,7 +2,14 @@ import rasterio.features
 from shapely.geometry import shape
 import geopandas as gpd
 
-def export_mask_to_polygons(data_array, output_filename="flood_polygons.geojson"):
+def export_mask_to_polygons(
+    data_array,
+    output_filename="flood_polygons.geojson",
+    event_date=None,
+    scene_id=None,
+    orbit_state=None,
+    source="FloodSense Sentinel-1 SAR"
+):
     """
     Converts a binary xarray DataArray mask into a GeoDataFrame of polygons,
     keeping only the areas where the value is 1, and exports it.
@@ -31,7 +38,27 @@ def export_mask_to_polygons(data_array, output_filename="flood_polygons.geojson"
         return None
         
     # Create a GeoDataFrame using the geometries and the original CRS
-    gdf = gpd.GeoDataFrame(geometry=geometries, crs=data_array.rio.crs)
+    gdf = gpd.GeoDataFrame(
+        {
+            "flood_id": range(1, len(geometries) + 1)
+        },
+        geometry=geometries,
+        crs=data_array.rio.crs
+    )
+
+    # Event metadata
+    gdf["event_date"] = event_date
+    gdf["scene_id"] = scene_id
+    gdf["orbit_state"] = orbit_state
+
+    # Operational metadata
+    gdf["source"] = source
+    gdf["status"] = "Potential Flooding"
+
+    # Area metrics
+    gdf["area_m2"] = gdf.geometry.area
+    gdf["area_ha"] = gdf["area_m2"] / 10000
+    gdf["area_km2"] = gdf["area_m2"] / 1000000
     
     # Export to file (GeoJSON or Shapefile depending on the extension provided)
     try:
