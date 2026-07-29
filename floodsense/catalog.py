@@ -1,3 +1,11 @@
+import geopandas as gpd
+import pystac_client
+import planetary_computer
+
+
+from datetime import datetime
+import pytz
+
 def get_rtc_catalog_items(shapefile_path, date_range):
     """
     Finds Sentinel-1 RTC items and handles CRS projection for the search.
@@ -61,10 +69,6 @@ def select_scenes_by_orbit(items, orbit_state="descending"):
               "Check available metadata or try 'ascending'.")
         
     return selected_items
-
-
-from datetime import datetime
-import pytz
 
 def select_scene_for_processing(items, index=0):
     """
