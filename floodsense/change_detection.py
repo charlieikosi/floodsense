@@ -44,6 +44,41 @@ def calculate_ssim_change(data_before, data_after, window_size=7):
     print(f"SSIM processing complete. Average similarity score: {score:.2f}")
     return ssim_xr
 
+def calculate_dual_pol_change_db(data_before, data_after):
+    """
+    Calculates VV and VH log-ratio change in dB.
+
+    Returns:
+    --------
+    change_vv : xarray.DataArray
+        VV change in decibels.
+
+    change_vh : xarray.DataArray
+        VH change in decibels.
+    """
+
+    print("Calculating VV and VH change layers...")
+
+    change_vv = 10 * np.log10(
+        data_after.vv / data_before.vv
+    )
+
+    change_vh = 10 * np.log10(
+        data_after.vh / data_before.vh
+    )
+
+    change_vv.rio.write_crs(
+        data_before.rio.crs,
+        inplace=True
+    )
+
+    change_vh.rio.write_crs(
+        data_before.rio.crs,
+        inplace=True
+    )
+
+    return change_vv, change_vh
+
 
 def calculate_wind_aware_mask(data_before, data_after, threshold_db=-2.5):
     """
@@ -75,3 +110,38 @@ def calculate_wind_aware_mask(data_before, data_after, threshold_db=-2.5):
     robust_mask.rio.write_crs(data_before.rio.crs, inplace=True)
     
     return robust_mask
+
+def calculate_dual_pol_change_db(data_before, data_after):
+    """
+    Calculates VV and VH log-ratio change in dB.
+
+    Returns:
+    --------
+    change_vv : xarray.DataArray
+        VV change in decibels.
+
+    change_vh : xarray.DataArray
+        VH change in decibels.
+    """
+
+    print("Calculating VV and VH change layers...")
+
+    change_vv = 10 * np.log10(
+        data_after.vv / data_before.vv
+    )
+
+    change_vh = 10 * np.log10(
+        data_after.vh / data_before.vh
+    )
+
+    change_vv.rio.write_crs(
+        data_before.rio.crs,
+        inplace=True
+    )
+
+    change_vh.rio.write_crs(
+        data_before.rio.crs,
+        inplace=True
+    )
+
+    return change_vv, change_vh

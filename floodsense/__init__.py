@@ -38,6 +38,7 @@ from .preprocessing import (
 from .change_detection import (
     calculate_ssim_change,
     calculate_wind_aware_mask,
+    calculate_dual_pol_change_db,
 )
 
 # Flood Mask Refinement
@@ -70,6 +71,7 @@ __all__ = [
     # Change Detection
     "calculate_ssim_change",
     "calculate_wind_aware_mask",
+    "calculate_dual_pol_change_db",
 
     # Masking
     "apply_binary_median_filter",
