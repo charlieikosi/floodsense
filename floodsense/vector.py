@@ -102,8 +102,8 @@ def export_mask_to_polygons(
     gdf["mean_vv_change_db"] = None
     gdf["mean_vh_change_db"] = None
 
-    gdf["max_vv_change_db"] = None
-    gdf["max_vh_change_db"] = None
+    gdf["min_vv_change_db"] = None
+    gdf["min_vh_change_db"] = None
 
     if change_vv is not None and change_vh is not None:
 
@@ -132,12 +132,12 @@ def export_mask_to_polygons(
                     vh_clip.mean().values
                 )
 
-                gdf.loc[idx, "max_vv_change_db"] = float(
-                    vv_clip.max().values
+                gdf.loc[idx, "min_vv_change_db"] = float(
+                    vv_clip.min().values
                 )
 
-                gdf.loc[idx, "max_vh_change_db"] = float(
-                    vh_clip.max().values
+                gdf.loc[idx, "min_vh_change_db"] = float(
+                    vh_clip.min().values
                 )
 
             except Exception as e:
