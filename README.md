@@ -20,7 +20,7 @@ Designed for operational geospatial workflows, FloodSense helps transform satell
 
 ## Key Functions
 
-### 1. get_rtc_catalog_items()
+### 1. get_rtc_catalog_items(shapefile_path, date_range)
 
 **Purpose:** Discover Sentinel‑1 RTC imagery for an Area of Interest (AOI).
 
@@ -35,7 +35,7 @@ Designed for operational geospatial workflows, FloodSense helps transform satell
 
 **Role in workflow:** Data acquisition and scene discovery.
 
-### 2. select_scenes_by_orbit()
+### 2. select_scenes_by_orbit(items, orbit_state="descending")
 
 **Purpose:** Ensure SAR scenes are from a consistent orbit direction.
 
@@ -49,7 +49,7 @@ Designed for operational geospatial workflows, FloodSense helps transform satell
 
 **Role in workflow:** Scene quality control.
 
-### 3. select_scene_for_processing()
+### 3. select_scene_for_processing(items, index=0)
 
 **Purpose:** Select a single image for analysis.
 
@@ -62,7 +62,7 @@ Designed for operational geospatial workflows, FloodSense helps transform satell
 
 **Role in workflow:** Scene selection and metadata management.
 
-### 4. apply_spatial_tuning()
+### 4. apply_spatial_tuning(data_array, window_size=3)
 
 **Purpose:** Reduce SAR speckle noise before flood detection.
 
@@ -77,7 +77,7 @@ Designed for operational geospatial workflows, FloodSense helps transform satell
 
 **Role in workflow:** Image preprocessing.
 
-### 5. apply_permanent_water_mask()
+### 5. apply_permanent_water_mask(flood_mask, aoi_gdf)
 
 **Purpose:** Remove permanent water bodies from flood results.
 
