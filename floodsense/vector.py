@@ -89,7 +89,7 @@ def export_mask_to_polygons(
     baseline_scene_id=None,
     threshold_db=None,
     smoothing_window=None,
-    processing_version="0.0.1",
+    processing_version="0.0.2",
     change_vv=None,
     change_vh=None
 ):
