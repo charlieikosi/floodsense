@@ -33,23 +33,23 @@ def classify_confidence(
     score = 0
 
     # VH component (0-50)
-    if mean_vh_change_db <= -6:
+    if mean_vh_change_db <= -5:
         score += 50
 
     elif mean_vh_change_db <= -4:
         score += 35
 
-    elif mean_vh_change_db <= -2.5:
+    elif mean_vh_change_db <= -3:
         score += 20
 
     # VV component (0-30)
-    if mean_vv_change_db <= -5:
+    if mean_vv_change_db <= -3:
         score += 30
 
-    elif mean_vv_change_db <= -3:
+    elif mean_vv_change_db <= -2:
         score += 20
 
-    elif mean_vv_change_db <= -2:
+    elif mean_vv_change_db <= -1:
         score += 10
 
     # Area component (0-20)
@@ -63,10 +63,13 @@ def classify_confidence(
         score += 5
 
     # Classification
-    if score >= 75:
+    if score >= 85:
+        confidence = "Very High"
+
+    elif score >= 65:
         confidence = "High"
 
-    elif score >= 50:
+    elif score >= 40:
         confidence = "Medium"
 
     else:
