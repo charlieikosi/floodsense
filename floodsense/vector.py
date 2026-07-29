@@ -58,6 +58,12 @@ def export_mask_to_polygons(
     gdf["scene_id"] = scene_id
     gdf["orbit_state"] = orbit_state
 
+    # Processing metadata
+    gdf["baseline_scene_id"] = baseline_scene_id
+    gdf["threshold_db"] = threshold_db
+    gdf["smoothing_window"] = smoothing_window
+    gdf["processing_version"] = processing_version
+
     # Operational metadata
     gdf["source"] = source
     gdf["status"] = "Potential Flooding"
