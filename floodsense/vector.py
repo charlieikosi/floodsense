@@ -2,13 +2,20 @@ import rasterio.features
 from shapely.geometry import shape
 import geopandas as gpd
 
+from datetime import datetime, timezone
+
 def export_mask_to_polygons(
     data_array,
     output_filename="flood_polygons.geojson",
     event_date=None,
     scene_id=None,
     orbit_state=None,
-    source="FloodSense Sentinel-1 SAR"
+    source="FloodSense Sentinel-1 SAR",
+    baseline_scene_id=None,
+    threshold_db=None,
+    smoothing_window=None,
+    processing_version="0.0.1"
+
 ):
     """
     Converts a binary xarray DataArray mask into a GeoDataFrame of polygons,
@@ -54,6 +61,9 @@ def export_mask_to_polygons(
     # Operational metadata
     gdf["source"] = source
     gdf["status"] = "Potential Flooding"
+    gdf["processed_utc"] = datetime.now(
+        timezone.utc
+    ).isoformat()
 
     # Area metrics
     gdf["area_m2"] = gdf.geometry.area
