@@ -4,10 +4,26 @@ import geopandas as gpd
 
 from datetime import datetime, timezone
 
+def classify_severity(area_ha):
+    """
+    Classify flood severity based on polygon area.
+    Thresholds can be refined later.
+    """
+
+    if area_ha < 5:
+        return "Low"
+
+    elif area_ha < 50:
+        return "Medium"
+
+    else:
+        return "High"
+
 def export_mask_to_polygons(
     data_array,
     output_filename="flood_polygons.geojson",
     event_date=None,
+    event_datetime=None,
     scene_id=None,
     orbit_state=None,
     source="FloodSense Sentinel-1 SAR",
@@ -55,6 +71,7 @@ def export_mask_to_polygons(
 
     # Event metadata
     gdf["event_date"] = event_date
+    gdf["event_datetime"] = event_datetime
     gdf["scene_id"] = scene_id
     gdf["orbit_state"] = orbit_state
 
@@ -75,6 +92,11 @@ def export_mask_to_polygons(
     gdf["area_m2"] = gdf.geometry.area
     gdf["area_ha"] = gdf["area_m2"] / 10000
     gdf["area_km2"] = gdf["area_m2"] / 1000000
+
+    # Severity classification
+    gdf["severity"] = gdf["area_ha"].apply(
+        classify_severity
+    )
     
     # Export to file (GeoJSON or Shapefile depending on the extension provided)
     try:
