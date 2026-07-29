@@ -30,8 +30,9 @@ def export_mask_to_polygons(
     baseline_scene_id=None,
     threshold_db=None,
     smoothing_window=None,
-    processing_version="0.0.1"
-
+    processing_version="0.0.1",
+    change_vv=None,
+    change_vh=None
 ):
     """
     Converts a binary xarray DataArray mask into a GeoDataFrame of polygons,
@@ -97,6 +98,12 @@ def export_mask_to_polygons(
     gdf["severity"] = gdf["area_ha"].apply(
         classify_severity
     )
+
+    gdf["mean_vv_change_db"] = None
+    gdf["mean_vh_change_db"] = None
+
+    gdf["max_vv_change_db"] = None
+    gdf["max_vh_change_db"] = None
     
     # Export to file (GeoJSON or Shapefile depending on the extension provided)
     try:
