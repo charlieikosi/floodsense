@@ -4,6 +4,45 @@ import geopandas as gpd
 
 from datetime import datetime, timezone
 
+def classify_season(event_datetime):
+    """
+    Returns NZ season based on acquisition date.
+    """
+
+    month = event_datetime.month
+
+    if month in [12, 1, 2]:
+        return "Summer"
+
+    elif month in [3, 4, 5]:
+        return "Autumn"
+
+    elif month in [6, 7, 8]:
+        return "Winter"
+
+    else:
+        return "Spring"
+
+
+def classify_season(event_datetime):
+    """
+    Returns NZ season from acquisition date.
+    """
+
+    month = event_datetime.month
+
+    if month in [12, 1, 2]:
+        return "Summer"
+
+    elif month in [3, 4, 5]:
+        return "Autumn"
+
+    elif month in [6, 7, 8]:
+        return "Winter"
+
+    else:
+        return "Spring"    
+
 def classify_severity(area_ha):
     """
     Classify flood severity based on polygon area.
@@ -170,6 +209,19 @@ def export_mask_to_polygons(
     gdf["event_datetime"] = event_datetime
     gdf["scene_id"] = scene_id
     gdf["orbit_state"] = orbit_state
+
+    # Season metadata
+    gdf["month"] = None
+    gdf["season"] = None
+
+    if event_datetime is not None:
+
+        event_dt = datetime.fromisoformat(
+            event_datetime.replace("Z", "+00:00")
+        )
+
+        gdf["month"] = event_dt.month
+        gdf["season"] = classify_season(event_dt)
 
     # Processing metadata
     gdf["baseline_scene_id"] = baseline_scene_id
