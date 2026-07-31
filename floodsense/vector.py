@@ -22,26 +22,7 @@ def classify_season(event_datetime):
 
     else:
         return "Spring"
-
-
-def classify_season(event_datetime):
-    """
-    Returns NZ season from acquisition date.
-    """
-
-    month = event_datetime.month
-
-    if month in [12, 1, 2]:
-        return "Summer"
-
-    elif month in [3, 4, 5]:
-        return "Autumn"
-
-    elif month in [6, 7, 8]:
-        return "Winter"
-
-    else:
-        return "Spring"    
+   
 
 def classify_severity(area_ha):
     """
@@ -166,7 +147,9 @@ def export_mask_to_polygons(
     smoothing_window=None,
     processing_version="0.0.2",
     change_vv=None,
-    change_vh=None
+    change_vh=None,
+    dem=None,
+    terrain_slope=None
 ):
     """
     Converts a binary xarray DataArray mask into a GeoDataFrame of polygons,
@@ -255,6 +238,13 @@ def export_mask_to_polygons(
     gdf["min_vv_change_db"] = None
     gdf["min_vh_change_db"] = None
 
+    # Terrain intelligence
+    gdf["mean_elevation_m"] = None
+    gdf["max_elevation_m"] = None
+
+    gdf["mean_slope_deg"] = None
+    gdf["max_slope_deg"] = None
+
     if change_vv is not None and change_vh is not None:
 
         for idx, row in gdf.iterrows():
@@ -273,6 +263,40 @@ def export_mask_to_polygons(
                     gdf.crs,
                     drop=True
                 )
+
+                # Elevation statistics
+                if dem is not None:
+
+                    dem_clip = dem.rio.clip(
+                        geom,
+                        gdf.crs,
+                        drop=True
+                    )
+
+                    gdf.loc[idx, "mean_elevation_m"] = float(
+                        dem_clip.mean().values
+                    )
+
+                    gdf.loc[idx, "max_elevation_m"] = float(
+                        dem_clip.max().values
+                    )
+
+                # Slope statistics
+                if terrain_slope is not None:
+
+                    slope_clip = terrain_slope.rio.clip(
+                        geom,
+                        gdf.crs,
+                        drop=True
+                    )
+
+                    gdf.loc[idx, "mean_slope_deg"] = float(
+                        slope_clip.mean().values
+                    )
+
+                    gdf.loc[idx, "max_slope_deg"] = float(
+                        slope_clip.max().values
+                    )
 
                 gdf.loc[idx, "mean_vv_change_db"] = float(
                     vv_clip.mean().values

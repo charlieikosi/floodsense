@@ -128,7 +128,11 @@ def apply_terrain_mask(flood_mask, aoi_gdf, max_slope_degrees=5.0):
     removed_pixels = int((flood_mask.sum() - terrain_corrected_mask.sum()).values)
     print(f"Terrain filter successfully removed {removed_pixels} false positive pixels.")
     
-    return terrain_corrected_mask
+    return (
+    terrain_corrected_mask,
+    dem_aligned,
+    terrain_slope
+)
 
 
 def apply_binary_median_filter(binary_mask, window_size=3):
