@@ -78,6 +78,42 @@ def classify_confidence(
     return score, confidence
 
 
+def classify_status(
+    confidence_class,
+    confidence_score,
+    area_ha,
+    mean_vh_change_db
+):
+    """
+    Operational interpretation of a flood detection.
+
+    Confidence answers:
+        "How strong is the SAR evidence?"
+
+    Status answers:
+        "What should an analyst conclude?"
+    """
+
+    # Strong flood candidate
+    if (
+        confidence_class == "High"
+        and area_ha >= 5
+        and mean_vh_change_db <= -4
+    ):
+        return "Likely Flooding"
+
+    # Moderate evidence
+    elif (
+        confidence_class == "Medium"
+        and mean_vh_change_db <= -3
+    ):
+        return "Potential Flooding"
+
+    # Weak evidence requiring review
+    else:
+        return "Review Required"
+
+
 def export_mask_to_polygons(
     data_array,
     output_filename="flood_polygons.geojson",
@@ -143,7 +179,7 @@ def export_mask_to_polygons(
 
     # Operational metadata
     gdf["source"] = source
-    gdf["status"] = "Potential Flooding"
+    gdf["status"] = None
     gdf["processed_utc"] = datetime.now(
         timezone.utc
     ).isoformat()
@@ -194,14 +230,26 @@ def export_mask_to_polygons(
                     vh_clip.mean().values
                 )
 
+                mean_vv = float(vv_clip.mean().values)
+                mean_vh = float(vh_clip.mean().values)
+
                 confidence_score, confidence_class = classify_confidence(
                     row["area_ha"],
-                    float(vv_clip.mean().values),
-                    float(vh_clip.mean().values)
+                    mean_vv,
+                    mean_vh
                 )
 
                 gdf.loc[idx, "confidence_score"] = confidence_score
                 gdf.loc[idx, "confidence_class"] = confidence_class
+
+                status = classify_status(
+                    confidence_class,
+                    confidence_score,
+                    row["area_ha"],
+                    mean_vh
+                )
+
+                gdf.loc[idx, "status"] = status
 
                 gdf.loc[idx, "min_vv_change_db"] = float(
                     vv_clip.min().values
