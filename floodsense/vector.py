@@ -96,7 +96,7 @@ def classify_status(
 
     # Strong flood candidate
     if (
-        confidence_class == "High"
+        confidence_score >= 65
         and area_ha >= 5
         and mean_vh_change_db <= -4
     ):
@@ -104,12 +104,12 @@ def classify_status(
 
     # Moderate evidence
     elif (
-        confidence_class == "Medium"
+        confidence_score >= 40
         and mean_vh_change_db <= -3
     ):
         return "Potential Flooding"
 
-    # Weak evidence requiring review
+    # Weak or ambiguous evidence
     else:
         return "Review Required"
 
