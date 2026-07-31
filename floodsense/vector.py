@@ -99,37 +99,46 @@ def classify_confidence(
 
 
 def classify_status(
-    confidence_class,
     confidence_score,
     area_ha,
-    mean_vh_change_db
+    mean_vh_change_db,
+    season,
+    mean_elevation_m,
+    mean_slope_deg
 ):
     """
     Operational interpretation of a flood detection.
-
-    Confidence answers:
-        "How strong is the SAR evidence?"
-
-    Status answers:
-        "What should an analyst conclude?"
     """
 
-    # Strong flood candidate
+    # Likely snow or ice
     if (
+        season == "Winter"
+        and mean_elevation_m >= 1000
+    ):
+        return "Possible Snow/Ice"
+
+    # Steep terrain is suspicious
+    elif (
+        mean_slope_deg >= 10
+    ):
+        return "Possible Terrain Artefact"
+
+    # Strong flood candidate
+    elif (
         confidence_score >= 65
         and area_ha >= 5
         and mean_vh_change_db <= -4
     ):
         return "Likely Flooding"
 
-    # Moderate evidence
+    # Moderate flood candidate
     elif (
         confidence_score >= 40
         and mean_vh_change_db <= -3
     ):
         return "Potential Flooding"
 
-    # Weak or ambiguous evidence
+    # Everything else
     else:
         return "Review Required"
 
@@ -319,10 +328,12 @@ def export_mask_to_polygons(
                 gdf.loc[idx, "confidence_class"] = confidence_class
 
                 status = classify_status(
-                    confidence_class,
                     confidence_score,
                     row["area_ha"],
-                    mean_vh
+                    mean_vh,
+                    row["season"],
+                    gdf.loc[idx, "mean_elevation_m"],
+                    gdf.loc[idx, "mean_slope_deg"]
                 )
 
                 gdf.loc[idx, "status"] = status
