@@ -84,6 +84,9 @@ def find_matching_polygon(
             .area
         )
 
+        if current_polygon.area == 0:
+            continue
+
         overlap_fraction = (
             intersection_area /
             current_polygon.area
@@ -140,25 +143,35 @@ def update_persistence(
                 )
             )
 
-            first_detected = match.get(
-                "first_detected",
-                match["event_date"]
+            first_detected = str(
+                match.get(
+                    "first_detected",
+                    match["event_date"]
+                )
+            ).split(" ")[0]
+
+            current_date = str(
+                row["event_date"]
+            ).split(" ")[0]
+
+            print(
+                f"first_detected={first_detected} "
+                f"type={type(first_detected)}"
             )
 
-            current_date = row["event_date"]
-
-            first_dt = (
-                datetime.fromisoformat(
-                    str(first_detected)
-                    .replace("Z", "")
-                )
+            print(
+                f"current_date={current_date} "
+                f"type={type(current_date)}"
             )
 
-            current_dt = (
-                datetime.fromisoformat(
-                    str(current_date)
-                    .replace("Z", "")
-                )
+            first_dt = datetime.strptime(
+                first_detected,
+                "%Y-%m-%d"
+            )
+
+            current_dt = datetime.strptime(
+                current_date,
+                "%Y-%m-%d"
             )
 
             duration_days = (
