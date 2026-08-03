@@ -3,6 +3,7 @@ from shapely.geometry import shape
 import geopandas as gpd
 
 from datetime import datetime, timezone
+import time
 
 def classify_season(event_datetime):
     """
@@ -164,6 +165,10 @@ def export_mask_to_polygons(
     Converts a binary xarray DataArray mask into a GeoDataFrame of polygons,
     keeping only the areas where the value is 1, and exports it.
     """
+
+    # Start timer for performance logging
+    start_time = time.time()
+
     print("Vectorizing raster mask to polygons...")
     
     # Ensure the data is in the correct integer format for rasterio
@@ -359,5 +364,9 @@ def export_mask_to_polygons(
         print(f"Successfully exported {len(gdf)} polygons to: {output_filename}")
     except Exception as e:
         print(f"Vector export failed: {e}")
+
+    # Log the time taken for vectorization and export
+    elapsed = time.time() - start_time
+    print(f"Vector export completed in {elapsed:.1f} seconds.")
         
     return gdf
