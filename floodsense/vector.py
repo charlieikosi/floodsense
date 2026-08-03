@@ -114,7 +114,7 @@ def classify_status(
     # Likely snow or ice
     if (
         season == "Winter"
-        and mean_elevation_m >= 1000
+        and mean_elevation_m >= 500
     ):
         return "Possible Snow/Ice"
 
