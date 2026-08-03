@@ -265,7 +265,8 @@ from datetime import datetime
 
 def find_previous_geojson(
     current_date,
-    output_dir
+    output_dir,
+    grid_id
 ):
     """
     Find the most recent GeoJSON that
@@ -277,20 +278,22 @@ def find_previous_geojson(
     for filename in os.listdir(output_dir):
 
         if (
-            filename.startswith("flood_ext_")
+            filename.startswith(
+                f"{grid_id}_flood_ext_"
+            )
             and filename.endswith(".geojson")
         ):
 
             try:
 
+                date_string = (
+                    filename
+                    .replace(".geojson", "")
+                    .split("_")[-1]
+                )
+
                 file_date = datetime.strptime(
-                    filename.replace(
-                        "flood_ext_",
-                        ""
-                    ).replace(
-                        ".geojson",
-                        ""
-                    ),
+                    date_string,
                     "%Y-%m-%d"
                 )
 
