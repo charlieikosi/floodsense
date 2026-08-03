@@ -229,6 +229,13 @@ def export_mask_to_polygons(
     # Operational metadata
     gdf["source"] = source
     gdf["status"] = None
+
+    # Persistence
+    gdf["persistence_count"] = 1
+    gdf["persistence_class"] = "New"
+    gdf["first_detected"] = event_date
+    gdf["last_detected"] = event_date
+    gdf["duration_days"] = 0
     gdf["processed_utc"] = datetime.now(
         timezone.utc
     ).isoformat()
