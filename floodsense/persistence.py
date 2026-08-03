@@ -112,6 +112,10 @@ def update_persistence(
     previous flood layer.
     """
 
+    matched_count = 0
+    new_count = 0
+
+
     # Ensure persistence fields exist
 
     previous_gdf = ensure_persistence_fields(
@@ -136,6 +140,8 @@ def update_persistence(
         # ----------------------
         if match is not None:
 
+            matched_count += 1
+
             previous_count = int(
                 match.get(
                     "persistence_count",
@@ -153,16 +159,6 @@ def update_persistence(
             current_date = str(
                 row["event_date"]
             ).split(" ")[0]
-
-            print(
-                f"first_detected={first_detected} "
-                f"type={type(first_detected)}"
-            )
-
-            print(
-                f"current_date={current_date} "
-                f"type={type(current_date)}"
-            )
 
             first_dt = datetime.strptime(
                 first_detected,
@@ -212,6 +208,8 @@ def update_persistence(
         # ----------------------
         else:
 
+            new_count += 1
+
             current_date = row["event_date"]
 
             current_gdf.loc[
@@ -238,6 +236,25 @@ def update_persistence(
                 idx,
                 "duration_days"
             ] = 0
+
+    print(
+        f"Matched floods: {matched_count}")
+
+    persistent_count = len(
+        current_gdf[
+            current_gdf["persistence_count"] > 1
+        ]
+    )
+
+    print(
+        f"Persistent floods: "
+        f"{persistent_count}"
+    )
+    
+    
+    print(
+        f"New floods: {new_count}")
+    
 
     return current_gdf
 
