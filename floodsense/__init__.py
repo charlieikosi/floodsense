@@ -17,6 +17,11 @@ The package provides tools for:
 - Permanent water masking
 - GeoTIFF export
 - Flood polygon generation
+- Confidence scoring
+- Flood status classification
+- Terrain intelligence
+- Snow/terrain artefact flagging
+- Event persistence tracking
 """
 
 from .__version__ import __version__
@@ -58,6 +63,15 @@ from .vector import (
     export_mask_to_polygons,
 )
 
+# Event Persistence
+from .persistence import (
+    classify_persistence,
+    load_previous_polygons,
+    find_matching_polygon,
+    update_persistence,
+    find_previous_geojson,
+)
+
 __all__ = [
     # Catalog
     "get_rtc_catalog_items",
@@ -81,6 +95,13 @@ __all__ = [
     # Outputs
     "export_to_geotiff",
     "export_mask_to_polygons",
+
+    # Event Persistence
+    "classify_persistence",
+    "load_previous_polygons",
+    "find_matching_polygon",
+    "update_persistence",
+    "find_previous_geojson",
 
     # Metadata
     "__version__",
