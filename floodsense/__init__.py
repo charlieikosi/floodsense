@@ -17,6 +17,11 @@ The package provides tools for:
 - Permanent water masking
 - GeoTIFF export
 - Flood polygon generation
+- Confidence scoring
+- Flood status classification
+- Terrain intelligence
+- Snow/terrain artefact flagging
+- Event persistence tracking
 """
 
 from .__version__ import __version__
