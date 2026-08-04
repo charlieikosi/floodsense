@@ -1,92 +1,595 @@
 # FloodSense
 
-FloodSense is a Python toolkit for rapid flood detection and inundation mapping using Sentinel-1 SAR imagery and Microsoft Planetary Computer data.
+FloodSense is a Python toolkit for automated flood detection, flood intelligence, and event persistence monitoring using Sentinel-1 SAR imagery and Microsoft Planetary Computer data.
 
-The library provides an end-to-end workflow for flood mapping, including automated scene discovery, orbit-consistent image selection, SAR preprocessing, spatial noise reduction, permanent water masking, and change detection.
+FloodSense automates the discovery, preprocessing, filtering, and analysis of Sentinel-1 Synthetic Aperture Radar (SAR) imagery to generate flood extent maps while reducing false detections through orbit-aware processing, terrain masking, permanent water screening, confidence scoring, and event persistence tracking.
 
-Designed for operational geospatial workflows, FloodSense helps transform satellite observations into reliable flood intelligence for emergency response, infrastructure assessment, and environmental monitoring.
+---
 
-## Key Features
+## Features
 
-- Automated Sentinel-1 RTC data discovery
-- Microsoft Planetary Computer integration
-- Orbit-aware SAR scene selection
-- Spatial filtering and speckle reduction
-- Permanent water masking using ESA WorldCover
-- Scalable raster processing with xarray
-- Flood extent generation and analysis
+### Sentinel-1 SAR Processing
 
-> From satellite imagery to actionable flood insights.
+- Sentinel-1 RTC scene discovery
+- Orbit-aware scene filtering
+- Automated AOI clipping
+- Dual-polarisation (VV/VH) SAR processing
+- Speckle reduction and smoothing
 
-## Key Functions
+### Flood Detection
 
-### 1. get_rtc_catalog_items(shapefile_path, date_range)
+- Dual-polarisation change detection
+- Wind-aware flood detection
+- Binary noise filtering
+- Terrain masking
+- Permanent water masking
 
-**Purpose:** Discover Sentinel‑1 RTC imagery for an Area of Interest (AOI).
+### Flood Intelligence
 
-**What it does:**
+- Confidence scoring
+- Flood severity classification
+- Flood status classification
+- Seasonal intelligence
+- Terrain intelligence
+- Snow and terrain artefact flagging
 
-- Loads the AOI shapefile.
-- Reprojects the AOI to WGS84 (EPSG:4326).
-- Creates a bounding box for STAC searches.
-- Connects to the Microsoft Planetary Computer STAC API.
-- Searches the sentinel-1-rtc collection within a specified date range.
-- Returns matching STAC items and the AOI geometry.
+### Event Persistence
 
-**Role in workflow:** Data acquisition and scene discovery.
+FloodSense can track flood events through time.
 
-### 2. select_scenes_by_orbit(items, orbit_state="descending")
+Features include:
 
-**Purpose:** Ensure SAR scenes are from a consistent orbit direction.
+- Persistence count
+- Persistence classification
+- First detected date
+- Last detected date
+- Event duration tracking
 
-**What it does:**
+### Outputs
 
-- Filters STAC items by sat:orbit_state.
-- Supports ascending or descending passes.
-- Warns when no matching scenes are found.
+- GeoTIFF flood extent rasters
+- GeoJSON flood polygons
+- Detailed flood intelligence attributes
 
-**Why important:** Using the same orbit direction reduces geometric inconsistencies and false change signals in SAR-based flood mapping.
+---
 
-**Role in workflow:** Scene quality control.
+# Installation
 
-### 3. select_scene_for_processing(items, index=0)
+Install directly from GitHub:
 
-**Purpose:** Select a single image for analysis.
+```bash
+pip install git+https://github.com/charlieikosi/floodsense.git
+```
 
-**What it does:**
+Or clone locally:
 
-- Sorts scenes by acquisition date.
-- Chooses a scene by index.
-- Retrieves acquisition metadata.
-- Converts timestamps to New Zealand time for reporting and interpretation.
+```bash
+git clone https://github.com/charlieikosi/floodsense.git
 
-**Role in workflow:** Scene selection and metadata management.
+cd floodsense
 
-### 4. apply_spatial_tuning(data_array, window_size=3)
+pip install -e .
+```
 
-**Purpose:** Reduce SAR speckle noise before flood detection.
+---
 
-**What it does:**
+# Dependencies
 
-- Applies a 2D median filter using SciPy.
-- Processes each polarization band independently (e.g., VV, VH).
-- Preserves coordinates and CRS metadata.
-- Returns a smoothed xarray dataset.
+FloodSense relies on:
 
-**Why important:** SAR imagery contains speckle noise that can create false flood detections. Median filtering improves signal quality while retaining edges.
+```text
+planetary-computer
+pystac-client
+geopandas
+rioxarray
+xarray
+rasterio
+numpy
+scipy
+shapely
+pyproj
+```
 
-**Role in workflow:** Image preprocessing.
+Install all dependencies with:
 
-### 5. apply_permanent_water_mask(flood_mask, aoi_gdf)
+```bash
+pip install -r requirements.txt
+```
 
-**Purpose:** Remove permanent water bodies from flood results.
+---
 
-**What it does:**
+# Workflow Overview
 
-- Retrieves ESA WorldCover data from Planetary Computer.
-- Loads the most recent land-cover dataset.
-- Aligns the WorldCover raster with the flood mask.
-- Masks oceans, lakes, and other permanent water features.
-- Reduces false positives caused by pre-existing water.
+FloodSense follows the workflow below:
 
-**Role in workflow:** Post-processing and quality assurance.
+```text
+Baseline Scene
+       ↓
+Target Scene
+       ↓
+VV/VH Change Detection
+       ↓
+Wind-Aware Flood Detection
+       ↓
+Binary Noise Reduction
+       ↓
+Terrain Masking
+       ↓
+Permanent Water Masking
+       ↓
+Flood Polygon Generation
+       ↓
+Confidence Scoring
+       ↓
+Status Classification
+       ↓
+Terrain Intelligence
+       ↓
+Event Persistence Tracking
+```
+
+---
+
+# Configuration
+
+The workflow is controlled through a small set of configuration variables.
+
+Example:
+
+```python
+AOI = r"C:\path\to\AOI.shp"
+
+BASELINE_SCENE_ID = (
+    "S1A_IW_GRDH_1SDV_20250419T073047_20250419T073116_058822_rtc"
+)
+
+TARGET_DATE_RANGE = "2025-04-20/2025-05-08"
+
+ORBIT_STATE = "ascending"
+
+THRESHOLD_VAL = -2.5
+
+SMOOTHING_WINDOW = 17
+
+OUTPUT_DIR = "./output_payloads"
+```
+
+---
+
+## AOI
+
+AOI must be a polygon shapefile defining the area of interest.
+
+Example:
+
+```python
+AOI = r"C:\data\Canterbury_AOI.shp"
+```
+
+### Required Fields
+
+FloodSense expects a monitoring identifier field:
+
+```text
+gridID
+```
+
+Example:
+
+```text
+gridID
+
+A1-Whitianga
+CHC-001
+NRC-002
+```
+
+This field is used to generate unique output filenames.
+
+---
+
+## Baseline Scene
+
+Provide a Sentinel-1 RTC scene ID to use as the flood-free reference scene.
+
+Example:
+
+```python
+BASELINE_SCENE_ID = (
+    "S1C_IW_GRDH_1SDV_20260405T070704_20260405T070729_007077_00E551_rtc"
+)
+```
+
+The baseline should represent typical non-flood conditions.
+
+---
+
+## Target Date Range
+
+Specify the monitoring period.
+
+Example:
+
+```python
+TARGET_DATE_RANGE = "2026-07-01/2026-07-31"
+```
+
+FloodSense automatically searches for Sentinel-1 RTC scenes within this period.
+
+---
+
+## Orbit State
+
+To minimise SAR viewing angle differences:
+
+```python
+ORBIT_STATE = "ascending"
+```
+
+Supported values:
+
+```text
+ascending
+descending
+```
+
+---
+
+## Detection Threshold
+
+Flood detection threshold in decibels.
+
+Example:
+
+```python
+THRESHOLD_VAL = -2.5
+```
+
+Typical values:
+
+```text
+-2.0
+-2.5
+-3.0
+```
+
+---
+
+## Smoothing Window
+
+Median filter size used for SAR speckle reduction.
+
+Example:
+
+```python
+SMOOTHING_WINDOW = 17
+```
+
+---
+
+# Running FloodSense
+
+Example:
+
+```python
+from floodsense import *
+```
+
+Follow the workflow:
+
+```python
+target_items, my_aoi = get_rtc_catalog_items(
+    AOI,
+    TARGET_DATE_RANGE
+)
+
+target_items = select_scenes_by_orbit(
+    target_items,
+    orbit_state="ascending"
+)
+```
+
+Load data:
+
+```python
+data_baseline = load_and_crop_dual_pol(
+    baseline_scene,
+    AOI
+)
+```
+
+Calculate change:
+
+```python
+change_vv, change_vh = (
+    calculate_dual_pol_change_db(
+        data_baseline,
+        data_current
+    )
+)
+```
+
+Generate flood masks:
+
+```python
+wind_aware_flood_mask =
+    calculate_wind_aware_mask(...)
+```
+
+Export flood products:
+
+```python
+export_to_geotiff(...)
+export_mask_to_polygons(...)
+```
+
+---
+
+# Output Naming
+
+Outputs use the AOI Grid ID.
+
+Example:
+
+```text
+A1-Whitianga_flood_ext_2026-07-12.tif
+
+A1-Whitianga_flood_ext_2026-07-12.geojson
+```
+
+This prevents conflicts between multiple monitoring locations.
+
+---
+
+# Output Attributes
+
+Every flood polygon includes the following attributes.
+
+---
+
+## Event Metadata
+
+```text
+event_date
+event_datetime
+scene_id
+orbit_state
+```
+
+---
+
+## Processing Metadata
+
+```text
+baseline_scene_id
+threshold_db
+smoothing_window
+processing_version
+processed_utc
+```
+
+---
+
+## Flood Characteristics
+
+```text
+area_m2
+area_ha
+area_km2
+
+severity
+```
+
+Severity Classes:
+
+```text
+Low
+Medium
+High
+```
+
+---
+
+## SAR Evidence
+
+```text
+mean_vv_change_db
+mean_vh_change_db
+
+min_vv_change_db
+min_vh_change_db
+```
+
+---
+
+## Confidence
+
+FloodSense calculates a confidence score using:
+
+- VH change
+- VV change
+- Flood area
+
+Outputs:
+
+```text
+confidence_score
+confidence_class
+```
+
+Confidence Classes:
+
+```text
+Low
+Medium
+High
+Very High
+```
+
+---
+
+## Seasonal Intelligence
+
+```text
+month
+season
+```
+
+Possible values:
+
+```text
+Summer
+Autumn
+Winter
+Spring
+```
+
+---
+
+## Terrain Intelligence
+
+```text
+mean_elevation_m
+max_elevation_m
+
+mean_slope_deg
+max_slope_deg
+```
+
+Derived from Copernicus DEM.
+
+---
+
+## Flood Status
+
+Operational interpretation of each detection.
+
+Possible values:
+
+```text
+Likely Flooding
+
+Potential Flooding
+
+Review Required
+
+Possible Snow/Ice
+
+Possible Terrain Artefact
+```
+
+---
+
+## Event Persistence
+
+FloodSense tracks flood events through time.
+
+Attributes:
+
+```text
+persistence_count
+
+persistence_class
+
+first_detected
+
+last_detected
+
+duration_days
+```
+
+Persistence Classes:
+
+```text
+New
+
+Persistent
+
+Long Duration
+```
+
+---
+
+# Confidence Scoring
+
+Confidence scores are calculated using:
+
+```text
+VH Change (0–50 points)
+
+VV Change (0–30 points)
+
+Flood Area (0–20 points)
+```
+
+Maximum score:
+
+```text
+100
+```
+
+Confidence classes:
+
+```text
+85–100  → Very High
+
+65–84   → High
+
+40–64   → Medium
+
+0–39    → Low
+```
+
+---
+
+# Event Persistence
+
+FloodSense tracks flood events across consecutive acquisitions using polygon overlap analysis.
+
+Floods are considered persistent when:
+
+```text
+Polygon overlap >= 50%
+```
+
+between subsequent observations.
+
+Metrics include:
+
+```text
+Persistence Count
+
+Duration Days
+
+First Detected
+
+Last Detected
+```
+
+---
+
+# Current Limitations
+
+- Event persistence is based on consecutive acquisitions
+- Snow/terrain flagging is currently rule-based
+- Persistence tracks flood events rather than long-term flood recurrence
+- Confidence scoring uses empirical thresholds that may require regional calibration
+
+---
+
+# License
+
+MIT License
+
+---
+
+# Acknowledgements
+
+FloodSense uses:
+
+- Sentinel-1 SAR imagery
+- Microsoft Planetary Computer
+- Copernicus DEM
+- ESA WorldCover
+
+to support automated flood monitoring and flood intelligence workflows.
