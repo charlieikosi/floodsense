@@ -26,6 +26,11 @@ The package provides tools for:
 
 from .__version__ import __version__
 
+# Database
+from .database import (
+    append_to_floodsense_database,
+)
+
 # Catalog / Scene Discovery
 from .catalog import (
     get_rtc_catalog_items,
@@ -73,6 +78,10 @@ from .persistence import (
 )
 
 __all__ = [
+
+    # Database
+    "append_to_floodsense_database",
+
     # Catalog
     "get_rtc_catalog_items",
     "select_scenes_by_orbit",
